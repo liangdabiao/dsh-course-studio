@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Course studio → Mathigon interactive textbook",
+    "description": "Author high-quality interactive STEM courseware in a local Mathigon repo following the Mathigon methodology. The sidebar workbench has overview, course request form, courseware archive (persistent, restorable deletes) and live preview of the real rendered course."
+  }
+}
