@@ -206,95 +206,62 @@ function archiveCard(a) {
 // ---------------------------------------------------------------- 发起制作
 
 function viewNew(c) {
-  const subjects = c.subjects || ['数学', '物理', '化学', '生物', '地理', '信息科技', '其他']
-  const grades = c.grades || ['小学', '初中', '高中', '大学', '通识']
   const serversUp = c.server?.up
   return `
   <div class="wrap">
     <div class="head">
       <div class="eyebrow">NEW COURSEWARE</div>
       <h1>发起制作</h1>
-      <p>填一份课程需求，生成给 agent 的创作指令——它会按 course-studio 技能读参考、写课程、编译校验并存证。生成后点「发起」，在新对话里发送即可。</p>
+      <p>一句话说清你想要的课件就行——学科、学段、互动方式都可以不说，agent 会按 course-studio 技能自行判断。</p>
     </div>
 
     <div class="panel">
-      <div class="form">
-        <label class="fld">学科
-          <select id="f-subject">${subjects.map((s) => `<option>${esc(s)}</option>`).join('')}</select>
-        </label>
-        <label class="fld">学段
-          <select id="f-grade">${grades.map((s) => `<option>${esc(s)}</option>`).join('')}</select>
-        </label>
-        <label class="fld" style="grid-column:1/-1">主题（必填）<input id="f-topic" placeholder="例：勾股定理——为什么直角三角形三边有 a²+b²=c² 的关系"></label>
-        <label class="fld" style="grid-column:1/-1">教学目标 / 重点<input id="f-goal" placeholder="例：学生能自己拼出面积证明，并能用定理求斜边"></label>
-        <label class="fld">互动要求<input id="f-interactive" placeholder="例：拖拽直角三角形验证、滑动滑杆改变边长、面积拼块"></label>
-        <label class="fld">教材定位<input id="f-locate" placeholder="例：人教版八下第十七章第 1 节"></label>
-        <label class="fld" style="grid-column:1/-1">其他要求（可选）<textarea id="f-extra" rows="2" placeholder="例：约 6 个 section；中文课件；结尾配 5 道测验"></textarea></label>
+      <textarea id="f-topic" rows="3" placeholder="例：做一节勾股定理的互动课，学生能拖拽方块拼出面积证明"></textarea>
+      <div class="toolbar" style="margin-top:10px;margin-bottom:0">
+        <span class="preview-note">试试：</span>
+        <button class="pill" data-ex="做一节光的折射互动课，解释为什么筷子插进水里看起来是弯的">光的折射</button>
+        <button class="pill" data-ex="给初中生做一节一元二次方程的互动课，配 5 道测验">一元二次方程</button>
+        <button class="pill" data-ex="做一个单摆实验的虚拟实验室课件，能调摆长看周期变化">单摆实验</button>
       </div>
-      <div style="margin-top:12px"><button class="btn" id="f-gen">生成创作指令</button></div>
-    </div>
-
-    <div class="panel" id="f-prompt-panel" hidden>
-      <div class="sec-head" style="margin-top:0"><h2>创作指令</h2><span class="sub">可直接编辑</span>
-        <span class="grow"></span><button class="btn small ghost" id="f-copy">复制</button></div>
-      <textarea id="f-prompt" rows="12" style="font-family:ui-monospace,Consolas,monospace;font-size:11.5px"></textarea>
-      <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
-        <button class="btn jade" id="f-start">在新对话发起制作</button>
-        <span class="preview-note">agent 完成后会 course_studio save 存证，回到「课件档案」回看、在「课件预览」里看真实效果。</span>
+      <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn jade" id="f-start">发起制作</button>
+        <button class="btn ghost" id="f-copy">复制指令</button>
+        <span class="preview-note">agent 做完会自动存证；预览服务没起时在「课件预览」页点一下「启动预览服务」。${serversUp ? '' : '（当前预览服务未启动）'}</span>
       </div>
+      <details style="margin-top:14px">
+        <summary class="preview-note" style="cursor:pointer">查看将发给 agent 的完整指令</summary>
+        <textarea id="f-prompt" rows="9" readonly style="margin-top:8px;font-family:ui-monospace,Consolas,monospace;font-size:11.5px"></textarea>
+      </details>
     </div>
-
-    ${serversUp ? '' : `<div class="note" style="margin-top:12px">预览服务还没启动：agent 交付课件后，可在「课件预览」页点「启动预览服务」。</div>`}
   </div>`
 }
 
-function buildPrompt(f) {
-  const lines = [
-    `请用 course-studio 技能制作一节 Mathigon 互动课件：`,
-    ``,
-    `- 学科/学段：${f.subject} · ${f.grade}`,
-    `- 主题：${f.topic}`,
-  ]
-  if (f.goal) lines.push(`- 教学目标：${f.goal}`)
-  if (f.interactive) lines.push(`- 互动要求：${f.interactive}`)
-  if (f.locate) lines.push(`- 教材定位：${f.locate}`)
-  if (f.extra) lines.push(`- 其他要求：${f.extra}`)
-  lines.push(
-    ``,
-    `要求：`,
-    `1. 先 course_studio list 找最接近的现有课程当参照，slug 不要撞名；`,
-    `2. 课件写在课程仓库 content/<slug>/ 下（content.md + functions.ts），${f.extra?.includes('英文') ? '英文' : '中文'}撰写，遵守中文课件规范（每个 section 显式 > section: 英文 slug，backtick 公式里不放中文）；`,
-    `3. 数学里的长度/角度/坐标必须实算验证；`,
-    `4. 写完跑 course_studio lint 和 build，零 error 才算过；`,
-    `5. course_studio save 存证（填学科/学段/教学目标），serve 启动预览，并告诉我去侧栏「课程工坊」预览真实课件。`,
-  )
-  return lines.join('\n')
+function buildPrompt(topic) {
+  return [
+    '请用 course-studio 技能制作一节 Mathigon 互动课件：' + topic,
+    '',
+    '学科 / 学段 / 互动组件 / section 数量由你根据主题自行判断（默认中文课件，遵守技能红线：--- 分隔 step、显式 > section:、backtick 公式里不放中文、数学实算验证）。',
+    '先 course_studio list 找一门最接近的现有课程当参照，slug 不要撞名。',
+    '',
+    '完成闭环：course_studio lint → build（零 error）→ save 存证（填学科/学段/教学目标）→ serve，并告诉我去侧栏「课程工坊」预览真实课件。',
+  ].join('\n')
 }
 
 function bindNew() {
-  const gen = document.getElementById('f-gen')
-  const panel = document.getElementById('f-prompt-panel')
+  const topic = document.getElementById('f-topic')
   const promptEl = document.getElementById('f-prompt')
-  gen?.addEventListener('click', () => {
-    const topic = document.getElementById('f-topic').value.trim()
-    if (!topic) { toast('先填主题'); return }
-    const f = {
-      subject: document.getElementById('f-subject').value,
-      grade: document.getElementById('f-grade').value,
-      topic,
-      goal: document.getElementById('f-goal').value.trim(),
-      interactive: document.getElementById('f-interactive').value.trim(),
-      locate: document.getElementById('f-locate').value.trim(),
-      extra: document.getElementById('f-extra').value.trim(),
-    }
-    promptEl.value = buildPrompt(f)
-    panel.hidden = false
-    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  const sync = () => { promptEl.value = buildPrompt(topic.value.trim()) }
+  app.querySelectorAll('.pill[data-ex]').forEach((pill) =>
+    pill.addEventListener('click', () => { topic.value = pill.dataset.ex; sync() }))
+  topic?.addEventListener('input', sync)
+  document.getElementById('f-copy')?.addEventListener('click', () => {
+    if (!topic.value.trim()) { toast('先写一句话需求'); return }
+    sync(); copy(promptEl.value)
   })
-  document.getElementById('f-copy')?.addEventListener('click', () => copy(promptEl.value))
   document.getElementById('f-start')?.addEventListener('click', () => {
-    const prompt = promptEl.value.trim()
-    if (!prompt) { toast('先生成指令'); return }
+    const prompt = topic.value.trim()
+    if (!prompt) { toast('先写一句话需求'); return }
+    sync()
     start(prompt)
   })
 }
