@@ -102,6 +102,64 @@ test('getCourse：取单门课；不存在的 slug 返回 null', () => {
   assert.equal(getCourse(REPO, 'no-such-course'), null)
 })
 
+test('sections 去重保序：同一步骤/后续步骤重复声明 > section: 不虚增 section 数', () => {
+  const repo = join(SANDBOX, 'dup-repo')
+  const dir = join(repo, 'content', 'dup-sections')
+  mkdirSync(dir, { recursive: true })
+  writeFileSync(join(dir, 'content.md'), [
+    '# 重复 section 的课',
+    '',
+    '## 两种温标',
+    '> id: scales',
+    '> section: scales',
+    '',
+    '正文。',
+    '',
+    '---',
+    '> id: slope',
+    '> section: scales',   // 同一 section 的第二个 step（常见写法）
+    '',
+    '正文。',
+    '',
+    '## 一次函数图像',
+    '> id: graph',
+    '> section: linear',
+    '',
+    '---',
+    '> id: slider',
+    '> section: linear',
+    '',
+  ].join('\n'), 'utf8')
+  assert.deepEqual(getCourse(repo, 'dup-sections').sections, ['scales', 'linear'])
+  const scanned = scanCourses(repo).find((c) => c.slug === 'dup-sections')
+  assert.equal(scanned.sectionCount, 2)
+  // steps 仍按 > id: 数（4 个 step），不受 section 去重影响
+  assert.equal(scanned.steps, 4)
+})
+
+test('interactives：pug 缩进式组件 / HTML 标签 / 句内滑块都计数，静态 x-img 不算', () => {
+  const repo = join(SANDBOX, 'int-repo')
+  const dir = join(repo, 'content', 'int-course')
+  mkdirSync(dir, { recursive: true })
+  writeFileSync(join(dir, 'content.md'), [
+    '# 互动组件统计',
+    '',
+    '> id: one',
+    '> section: intro',
+    '',
+    '    x-geopad(width=600 height=400)',
+    '    x-slider(:bind="n" min=0 max=10)',
+    '',
+    '    x-img(src="fig.png")',           // 静态媒体，不算互动
+    '',
+    '<x-coordinate-system size="400"></x-coordinate-system>',
+    '',
+    '拖动滑块：现在是 ${n}{n|5|2,20,1} 摄氏度。',
+    '',
+  ].join('\n'), 'utf8')
+  assert.equal(getCourse(repo, 'int-course').interactives, 4) // geopad + slider + coordinate-system + 句内滑块
+})
+
 test('copyCourseSource：三件套 + hints + images 都归档，返回文件清单', () => {
   const course = getCourse(REPO, 'pythagoras-lab')
   const dest = join(SANDBOX, 'archive-out')
