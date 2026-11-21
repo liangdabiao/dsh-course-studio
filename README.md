@@ -2,6 +2,7 @@
 
 基于 [Mathigon](https://mathigon.org) 交互教科书方法论的 dsh 插件：**用户提课程需求 → agent 按 skill 在本地 Mathigon 仓库创作互动课件 → 编译校验 → 存证入档 → 面板预览真实渲染的课件**。课件档案持久化，可随时回看源码与真实效果。
 <img width="1737" height="951" alt="image" src="https://github.com/user-attachments/assets/066c42db-9ad8-4f69-b6ec-400e1199d4d6" />
+<img width="1767" height="1032" alt="image" src="https://github.com/user-attachments/assets/85178f87-83b1-4fa7-beb2-420f491a334e" />
 
 ## 它解决什么问题
 
