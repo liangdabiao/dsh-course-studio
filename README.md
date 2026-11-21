@@ -90,3 +90,5 @@ node scripts/panel-dev.mjs [--port 8899]
 ## 许可
 
 MIT。注意：Mathigon 仓库内容本身 UNLICENSED / private——创作课件请遵守所在仓库的许可约定，勿直接搬运其内容商用。
+
+感谢社区支持：https://linux.do
