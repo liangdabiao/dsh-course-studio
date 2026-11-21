@@ -1,6 +1,6 @@
 {
   "name": "dsh-course-studio",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "课程工坊（零 API 密钥 · agent 原生）：基于 Mathigon 交互教科书方法论制作高质量 STEM 互动课件——agent 按 skill 在本地 Mathigon 仓库创作课程（content.md + functions.ts + styles.scss），course_studio 工具负责课程盘点 / 环境自检 / 编译校验（拦 Maths parsing error）/ 课件存证 / 预览服务管理；侧栏「课程工坊」看板：概览 / 发起制作 / 课件档案（存证可回看）/ 真实课件预览（iframe 嵌入本地 mgon-serve 渲染页）。",
   "license": "MIT",
   "type": "module",
@@ -52,6 +52,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node test/lib.test.mjs",
+    "check:start": "node scripts/check-start-prompt.mjs",
     "prepack": "npm run build"
   }
 }

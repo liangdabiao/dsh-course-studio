@@ -79,7 +79,8 @@ courses/<id>/        源文件存证副本（content.md / functions.ts / styles.
 ```
 npm install
 npm run build        # 打包 client.js → dist/client.js
-npm test             # lib 层单测（沙盒，26 项）
+npm test             # lib 层单测（沙盒，28 项）
+npm run check:start  # 「发起制作」发出的指令是否为完整指令（前缀 / 需求原文 / 闭环要求）
 node scripts/smoke.mjs [--repo <仓库>] [--port <端口>]
                      # E2E 冒烟：工具全动作 + 真实课件页可达性（沙盒 DSH_HOME）
 node scripts/panel-dev.mjs [--port 8899]

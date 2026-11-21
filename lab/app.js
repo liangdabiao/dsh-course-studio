@@ -238,7 +238,7 @@ function viewNew(c) {
 
 function buildPrompt(topic) {
   return [
-    '请用 course-studio 技能制作一节 Mathigon 互动课件：' + topic,
+    '请利用「课程工坊」插件，制作 Mathigon 互动课件。需求：' + topic,
     '',
     '学科 / 学段 / 互动组件 / section 数量由你根据主题自行判断（默认中文课件，遵守技能红线：--- 分隔 step、显式 > section:、backtick 公式里不放中文、数学实算验证）。',
     '先 course_studio list 找一门最接近的现有课程当参照，slug 不要撞名。',
@@ -259,11 +259,13 @@ function bindNew() {
     sync(); copy(promptEl.value)
   })
   document.getElementById('f-start')?.addEventListener('click', () => {
-    const prompt = topic.value.trim()
-    if (!prompt) { toast('先写一句话需求'); return }
+    const topic = document.getElementById('f-topic').value.trim()
+    if (!topic) { toast('先写一句话需求'); return }
     sync()
-    start(prompt)
+    // 必须发「完整指令」：只发一句话需求的话，新对话里 agent 不知道要用本插件、也不知道闭环要求。
+    start(buildPrompt(topic))
   })
+  sync() // 进页面就把「完整指令」渲染出来，免得展开后是空白
 }
 
 // ---------------------------------------------------------------- 课件档案
